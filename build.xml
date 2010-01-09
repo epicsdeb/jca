@@ -26,8 +26,6 @@
     <!-- set the property arch to the correct value -->
 		<targetarch name="arch"/>
     
-		<property name="epics.base" value="${env.EPICS_BASE_RELEASE}"/>
-		<property name="install.dir" value="${env.EPICS_EXTENSIONS}"/>
 		<property file="config/config.${arch}.properties"/>
 		<property file="config/config.properties"/>
 
