@@ -1,0 +1,23 @@
+Source: jca
+Section: java
+Priority: extra
+Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
+Build-Depends: cdbs, debhelper (>= 7), javahelper, ant,
+               epics-dev
+Build-Depends-Indep: openjdk-6-jdk
+Standards-Version: 3.8.0
+Homepage: http://jca.cosylab.com/
+
+Package: libjca-java
+Architecture: any
+Depends: ${shlibs:Depends}, java6-runtime-headless, ${java:Depends}
+Description: EPICS Channel Access library for Java
+ A JNI wrapper for the EPICS client library.
+
+Package: libjca-java-doc
+Architecture: all
+Depends:
+Description: EPICS Channel Access library for Java
+ A JNI wrapper for the EPICS client library.
+ .
+ This package contains documentation including generated javadoc.
