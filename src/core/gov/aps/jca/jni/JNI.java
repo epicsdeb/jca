@@ -68,42 +68,20 @@ class JNI {
         // privileged code goes here:
         
         try {
-          try {
-            
-            String targetArch=JNITargetArch.getTargetArch();
-            //            System.out.println("TargetArch: "+targetArch);
-            JCALibrary jca=JCALibrary.getInstance();
-            
-            
-            String libPath=jca.getProperty( "gov.aps.jca.jni.epics."+targetArch+
-            ".library.path", "" );
-            loadLibrary( libPath, "Com" );
-            loadLibrary( libPath, "ca" );
-            
-            File caRepeaterPath=new File( jca.getProperty(
-            "gov.aps.jca.jni.epics."+targetArch+".caRepeater.path", "" ) );
-            try {
-              String caRepeater="caRepeater";
-              if( caRepeaterPath.exists() ) {
-                caRepeater= ( new File( caRepeaterPath, "caRepeater" ) ).
-                getAbsolutePath();
-                
-              }
-              Runtime.getRuntime().exec( caRepeater );
-            } catch( java.io.IOException ex ) {
-              Runtime.getRuntime().exec( "caRepeater" );
-            }
-          } catch( Throwable ex2 ) {
-            //            System.out.println(ex2);
-          }
-          //          System.out.println("Loading jca2");
-          System.loadLibrary( "jca" );
-          
-          return null; // nothing to return
+          Runtime.getRuntime().exec( "caRepeater" );
         } catch( Exception ex1 ) {
-          //          System.out.println(ex1);
+          System.out.println("Warning: failed to start caRepeater");
+        }
+
+        try{
+          System.loadLibrary( "jca" );
+        } catch( Exception ex1 ) {
+          System.out.print("Error: failed to load JNI library : ");
+          System.out.println(ex1);
           return ex1;
         }
+
+        return null; // nothing to return
       }
     };
     
