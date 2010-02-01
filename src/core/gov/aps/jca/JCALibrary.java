@@ -106,8 +106,7 @@ public final class JCALibrary {
     
     try {
       // system's properties
-      path=System.getProperty( "java.home" )+fileSep+"lib"+fileSep+
-      "JCALibrary.properties";
+      path="/etc/JCALibrary.properties";
       _defaultProperties.load( new FileInputStream( path ) );
     } catch( Throwable systemEx ) {
     }
