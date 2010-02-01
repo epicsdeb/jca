@@ -12,6 +12,8 @@ DEB_JARS += ant-nodeps
 
 DEB_INSTALL_DOCS_libjca-java-doc += doc/*
 
+DEB_INSTALL_DOCS_libjca-java += jcaexample.java
+
 build/libjca-java-doc::
 	$(DEB_ANT_INVOKE) doc
 
