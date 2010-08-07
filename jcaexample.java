@@ -1,7 +1,12 @@
 
 import gov.aps.jca.*;
 
-public class test {
+# Compile with
+#  javac -cp /usr/share/java/jca.jar jcaexample.java
+# and run with
+#  java -cp /usr/share/java/jca.jar:. jcaexample some:pvname
+
+public class jcaexample {
 
 	public static void main(String[] args) {
 		if(args.length!=1) {
