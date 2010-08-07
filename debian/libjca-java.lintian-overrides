@@ -1,2 +1,0 @@
-libjca-java: sharedobject-in-library-directory-missing-soname
-# JNI libraries don't get SO numbers.  The VM loaders doesn't know about them.

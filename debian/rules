@@ -1,32 +1,20 @@
 #!/usr/bin/make -f
 
-include /usr/share/cdbs/1/rules/debhelper.mk
-include /usr/share/cdbs/1/class/ant.mk
+#export DH_VERBOSE=1
 
 EPICS_HOST_ARCH:=$(shell /usr/epics/base/startup/EpicsHostArch)
 
-JAVA_HOME := /usr/lib/jvm/java-6-openjdk
+export JAVA_HOME := /usr/lib/jvm/java-6-openjdk
+export CLASSPATH=
 
-# Provides JNI tasks
-DEB_JARS += ant-nodeps
+%:
+	dh --with javahelper $@
 
-DEB_INSTALL_DOCS_libjca-java-doc += doc/*
+override_dh_auto_build:
+	ant build build.doc
 
-DEB_INSTALL_DOCS_libjca-java += jcaexample.java
+override_dh_auto_install:
+	dh_install -plibjca-jni O.$(EPICS_HOST_ARCH)/libjca.so usr/lib/jni/
 
-build/libjca-java-doc::
-	$(DEB_ANT_INVOKE) doc
-
-clean::
-	rm -rf doc/api
-
-install/libjca-java::
-	cp O.core/jca.jar jca.jar
-	dh_install -p$(cdbs_curpkg) O.$(EPICS_HOST_ARCH)/libjca.so usr/lib
-
-clean::
-	rm -f jca.jar
-
-binary-fixup/libjca-java::
-	jh_installlibs -v -p$(cdbs_curpkg)
-	jh_depends -v -p$(cdbs_curpkg)
+override_dh_auto_clean:
+	ant clean clean.doc
