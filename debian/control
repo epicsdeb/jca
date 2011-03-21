@@ -2,9 +2,10 @@ Source: jca
 Section: java
 Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
-Build-Depends: debhelper (>= 7), javahelper (>= 0.32~),
-               epics-dev
-Build-Depends-Indep: openjdk-6-jdk, openjdk-6-doc, ant
+Build-Depends: debhelper (>= 7.0.50~), javahelper (>= 0.32~),
+               epics-dev,
+               openjdk-6-jdk, openjdk-6-doc, ant,
+               ant-optional
 Standards-Version: 3.9.0
 Homepage: http://epics-jca.sourceforge.net/
 
