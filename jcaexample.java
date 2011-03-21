@@ -1,10 +1,10 @@
 
 import gov.aps.jca.*;
 
-# Compile with
-#  javac -cp /usr/share/java/jca.jar jcaexample.java
-# and run with
-#  java -cp /usr/share/java/jca.jar:. jcaexample some:pvname
+// Compile with
+//  javac -cp /usr/share/java/jca.jar jcaexample.java
+// and run with
+//  java -cp /usr/share/java/jca.jar:. jcaexample some:pvname
 
 public class jcaexample {
 
@@ -34,6 +34,7 @@ public class jcaexample {
 		} catch(Exception ex) {
 			System.out.print("Error: ");
 			System.out.println(ex);
+			ex.printStackTrace();
 		}
 	}
 }
