@@ -1,0 +1,5 @@
+repo: fe0a78d950a7dc627004a0ed3b32f1b8d9a0677c
+node: 8792875e6d33c1e0525200752a218047f6ba5f42
+branch: default
+latesttag: JCA_20110208_2_3_5
+latesttagdistance: 2

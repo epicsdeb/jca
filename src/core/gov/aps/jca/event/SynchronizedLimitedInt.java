@@ -93,8 +93,6 @@ public class SynchronizedLimitedInt {
 	}
   }
 
-  public int hashCode() { return get(); }
-
   public String toString() { return String.valueOf(get()); }
 
 }

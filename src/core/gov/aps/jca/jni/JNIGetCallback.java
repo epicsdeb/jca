@@ -39,9 +39,18 @@ class JNIGetCallback extends JNICallback {
     _source= source;
   }
   public void fire(int type, int count, long dbrid, int status) {
-    DBR dbr= DBRFactory.create(type,count);
-    JNI.dbr_update(dbr,dbrid);
-    dispatch(new GetEvent(_source, dbr, CAStatus.forValue(status)));
+	  try {
+		CAStatus st= CAStatus.forValue(status);
+		DBR dbr= null;
+		if (st.isSuccessful()) {
+		    dbr= DBRFactory.create(type,count);
+		    JNI.dbr_update(dbr,dbrid);
+		}
+	    dispatch(new GetEvent(_source, dbr, st));
+	  } catch (Throwable th) {
+		  // catch all exception not to break call from C++, report exception
+		  new RuntimeException("Unexpected exception caught.", th).printStackTrace();
+	  }
   }
 }
 
