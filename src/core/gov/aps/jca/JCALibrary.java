@@ -15,7 +15,7 @@
  *      Argonne National Laboratory
  *
  *
- * $Id: JCALibrary.java,v 1.16 2007-01-21 15:54:36 msekoranja Exp $
+ * $Id: JCALibrary.java,v 1.17 2009-09-14 10:29:56 msekoranja Exp $
  *
  */
 
@@ -69,7 +69,7 @@ public final class JCALibrary {
   static private final int VERSION=2;
   static private final int REVISION=3;
   // TODO version to be incremented - do not forget
-  static private final int MODIFICATION=2;
+  static private final int MODIFICATION=4;
   static private final String VERSION_STRING=""+VERSION+"."+REVISION+"."+MODIFICATION;
   
   static private JCALibrary _instance=null;

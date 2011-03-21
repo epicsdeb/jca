@@ -61,25 +61,37 @@ public class QueuedEventDispatcher extends AbstractEventDispatcher implements
     }
 
     
+    protected void nonBlockingQueueEvent(Event ev)
+    {
+    	queueEvent(ev, true);
+	}    
+
     protected void queueEvent(Event ev)
     {
-        // increment counter, will block if limit will be reached
-    	// avoid deadlock allowing recursive queue-ing 
-    	boolean doNotBlock = (Thread.currentThread() == _dispatcherThread);
-    	SynchronizedLimitedInt syncCounter = getSyncCounter(ev);
+    	queueEvent(ev, false);
+	}    
+
+    protected void queueEvent(Event ev, boolean doNotBlockRequired)
+    {
     	if (_killed) return;
-    	syncCounter.increment(doNotBlock);
+
+    	// increment counter, will block if limit will be reached
+    	// avoid deadlock allowing recursive queue-ing 
+    	boolean doNotBlock = doNotBlockRequired || (Thread.currentThread() == _dispatcherThread);
+    	incrementSyncCounter(ev, doNotBlock);
 
         synchronized (_queue)
         {
-        	if (!doNotBlock && _queue.size() >= _queueLimit)
+        	while (!doNotBlock && _queue.size() >= _queueLimit && !_killed)
         	{
 				try {
 					_queue.wait();
 				} catch (InterruptedException e) { }
         	}
         	
-            _queue.add(ev);
+        	if (_killed) return;
+
+        	_queue.add(ev);
             // notify event arrival
             _queue.notifyAll();
         }
@@ -89,20 +101,40 @@ public class QueuedEventDispatcher extends AbstractEventDispatcher implements
 	 * @param ev
 	 * @return
 	 */
-	private SynchronizedLimitedInt getSyncCounter(Event ev) {
-    	Object source = ev._ev.getSource();
+	private final void incrementSyncCounter(Event ev, boolean doNotBlock) {
+    	final Object source = ev._ev.getSource();
 
-    	SynchronizedLimitedInt sli = null;
+    	SynchronizedLimitedInt sli;
     	synchronized (_sourcesEventCount)
 		{
+    		// NOTE: hash code of source should not change !!!
     		sli = (SynchronizedLimitedInt)_sourcesEventCount.get(source);
-    		if (sli == null)
-    		{
-    			sli = new SynchronizedLimitedInt(0, _limit);
-    			_sourcesEventCount.put(source, sli);
+    		if (sli == null) {
+    			_sourcesEventCount.put(source, new SynchronizedLimitedInt(1, _limit));
+    			return;
     		}
 		}
-		return sli;
+    	// this will block when limit is reached
+    	// (NOTE: it might happen that sli is removed/destroyed here)
+		sli.increment(doNotBlock);
+	}
+
+    /**
+	 * @param ev
+	 * @return
+	 */
+	private final void decrementSyncCounter(Event ev) {
+    	final Object source = ev._ev.getSource();
+
+    	synchronized (_sourcesEventCount)
+		{
+    		final SynchronizedLimitedInt sli = (SynchronizedLimitedInt)_sourcesEventCount.get(source);
+    		if (sli != null && sli.decrement() <= 0)
+    		{
+    			_sourcesEventCount.remove(source);
+    			sli.destroy();
+    		}
+		}
 	}
 
 	/**
@@ -133,10 +165,10 @@ public class QueuedEventDispatcher extends AbstractEventDispatcher implements
                 synchronized (_queue)
                 {
                     // wait for new requests
-                    if (!_killed && _queue.isEmpty())
+                    while (!_killed && _queue.isEmpty())
                         _queue.wait();
                     
-                    if (!_killed && !_queue.isEmpty())
+                    if (!_killed)
                     {
                         eventsToProcess = _queue.size();
                         // create new instance of batch array only if necessary
@@ -164,13 +196,11 @@ public class QueuedEventDispatcher extends AbstractEventDispatcher implements
                         th.printStackTrace();
                     }
                     
-                    // decrement counter
-                    getSyncCounter(eventBatch[i]).decrement();
-                    
+                    decrementSyncCounter(eventBatch[i]);
+
 				    eventBatch[i] = null;	// allow to be gc'ed
                     Thread.yield();
-                }
-                
+                }                
             } catch (Throwable th) {
                 th.printStackTrace();
             }
@@ -194,6 +224,8 @@ public class QueuedEventDispatcher extends AbstractEventDispatcher implements
         	Iterator iter = _sourcesEventCount.values().iterator();
         	while (iter.hasNext())
         		((SynchronizedLimitedInt)iter.next()).destroy();
+        	
+        	_sourcesEventCount.clear();
 		}
     }
 
@@ -228,7 +260,7 @@ public class QueuedEventDispatcher extends AbstractEventDispatcher implements
     public void dispatch(ContextMessageEvent ev, List listeners)
     {
     	if (_killed) return;
-        queueEvent(new Event(ev, listeners.toArray()) {
+    	nonBlockingQueueEvent(new Event(ev, listeners.toArray()) {
             public void dispatch()
             {
                 for (int t = 0; t < _listeners.length; ++t)
@@ -246,7 +278,7 @@ public class QueuedEventDispatcher extends AbstractEventDispatcher implements
     public void dispatch(ContextExceptionEvent ev, List listeners)
     {
     	if (_killed) return;
-        queueEvent(new Event(ev, listeners.toArray()) {
+    	nonBlockingQueueEvent(new Event(ev, listeners.toArray()) {
             public void dispatch()
             {
                 for (int t = 0; t < _listeners.length; ++t)
@@ -264,7 +296,7 @@ public class QueuedEventDispatcher extends AbstractEventDispatcher implements
     public void dispatch(ConnectionEvent ev, List listeners)
     {
     	if (_killed) return;
-        queueEvent(new Event(ev, listeners.toArray()) {
+    	nonBlockingQueueEvent(new Event(ev, listeners.toArray()) {
             public void dispatch()
             {
                 for (int t = 0; t < _listeners.length; ++t)
@@ -282,7 +314,7 @@ public class QueuedEventDispatcher extends AbstractEventDispatcher implements
     public void dispatch(AccessRightsEvent ev, List listeners)
     {
     	if (_killed) return;
-        queueEvent(new Event(ev, listeners.toArray()) {
+    	nonBlockingQueueEvent(new Event(ev, listeners.toArray()) {
             public void dispatch()
             {
                 for (int t = 0; t < _listeners.length; ++t)
@@ -358,7 +390,7 @@ public class QueuedEventDispatcher extends AbstractEventDispatcher implements
 
   public void dispatch( ContextMessageEvent ev, ContextMessageListener cml) {
   	if (_killed) return;
-    queueEvent(new Event(ev, cml) {
+  	nonBlockingQueueEvent(new Event(ev, cml) {
         public void dispatch()
         {
             try {
@@ -373,7 +405,7 @@ public class QueuedEventDispatcher extends AbstractEventDispatcher implements
 
   public void dispatch( ContextExceptionEvent ev, ContextExceptionListener cel ) {
   	if (_killed) return;
-    queueEvent(new Event(ev, cel) {
+  	nonBlockingQueueEvent(new Event(ev, cel) {
         public void dispatch()
         {
             try {
@@ -387,7 +419,7 @@ public class QueuedEventDispatcher extends AbstractEventDispatcher implements
 
   public void dispatch( ConnectionEvent ev, ConnectionListener cl ) {
   	if (_killed) return;
-    queueEvent(new Event(ev, cl) {
+    nonBlockingQueueEvent(new Event(ev, cl) {
         public void dispatch()
         {
             try {
@@ -401,7 +433,7 @@ public class QueuedEventDispatcher extends AbstractEventDispatcher implements
 
   public void dispatch( AccessRightsEvent ev, AccessRightsListener arl ) {
   	if (_killed) return;
-    queueEvent(new Event(ev, arl) {
+  	nonBlockingQueueEvent(new Event(ev, arl) {
         public void dispatch()
         {
             try {
