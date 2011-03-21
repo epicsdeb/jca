@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 7), javahelper (>= 0.32~),
                epics-dev
 Build-Depends-Indep: openjdk-6-jdk, openjdk-6-doc, ant
 Standards-Version: 3.9.0
-Homepage: http://jca.cosylab.com/
+Homepage: http://epics-jca.sourceforge.net/
 
 Package: libjca-java
 Architecture: all
