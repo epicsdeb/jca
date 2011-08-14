@@ -34,3 +34,15 @@ Description: EPICS Channel Access library for Java
  A JNI wrapper for the EPICS client library.
  .
  This package contains documentation including generated javadoc.
+
+Package: jcatools
+Section: admin
+Architecture: all
+Depends: libjca-java (= ${source:Version}),
+         libcaj-java,
+         ${java:Depends}, ${misc:Depends}
+Recommends: ${java:Recommends}
+Description: EPICS Channel Access library for Java
+ A JNI wrapper for the EPICS client library.
+ .
+ Command line tools jcaget and jcaput

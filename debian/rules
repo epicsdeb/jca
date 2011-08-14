@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-#export DH_VERBOSE=1
+export DH_VERBOSE=1
 
 EPICS_HOST_ARCH:=$(shell /usr/lib/epics/startup/EpicsHostArch)
 
@@ -12,9 +12,13 @@ export CLASSPATH=
 
 override_dh_auto_build:
 	ant build build.doc
+	CLASSPATH=$(CURDIR)/O.core/jca.jar:/usr/share/java/commons-cli.jar jh_build jcaget.jar -mcaget src/jcaget
+	CLASSPATH=$(CURDIR)/O.core/jca.jar:/usr/share/java/commons-cli.jar jh_build jcaput.jar -mcaput src/jcaput
+	jh_classpath
 
 override_dh_auto_install:
 	dh_install -plibjca-jni O.$(EPICS_HOST_ARCH)/libjca.so usr/lib/jni/
 
 override_dh_auto_clean:
 	ant clean clean.doc
+	rm -f jcaget.jar jcaput.jar
