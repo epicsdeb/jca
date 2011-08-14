@@ -1,0 +1,9 @@
+Setting JCA properties
+
+$ cat << EOF > ~/.JCALibrary/JCALibrary.properties
+
+gov.aps.jca.Context.addr_list=localhost
+gov.aps.jca.Context.auto_addr_list=false
+gov.aps.jca.Context.max_array_bytes=10000000
+
+EOF
