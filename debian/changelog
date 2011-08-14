@@ -1,3 +1,10 @@
+jca (2.3.5-2) unstable; urgency=low
+
+  * Command line test programs jcaget and jcaput
+  * add note on setting JCALibrary properties in README
+
+ -- Michael Davidsaver <mdavidsaver@bnl.gov>  Sun, 14 Aug 2011 19:38:50 -0400
+
 jca (2.3.5-1) unstable; urgency=low
 
   * New upstream version
