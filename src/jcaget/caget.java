@@ -1,6 +1,13 @@
 
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import gov.aps.jca.*;
 import gov.aps.jca.event.*;
@@ -9,6 +16,8 @@ import gov.aps.jca.dbr.*;
 import org.apache.commons.cli.*;
 
 public class caget {
+	
+	private static Logger log = Logger.getLogger("caget");
 
     private static class Getter implements ConnectionListener, GetListener {
         private boolean isdone = false;
@@ -18,6 +27,7 @@ public class caget {
             chan = c;
             try {
                 chan.addConnectionListener(this);
+            	log.fine(chan.getName()+" Connect listener");
             } catch(CAException e) {
                 chan.destroy();
                 throw e;
@@ -26,16 +36,18 @@ public class caget {
 
         public void connectionChanged(ConnectionEvent ev) {
             if (!ev.isConnected()) {
+            	log.fine(chan.getName()+" disconnect");
                 return;
             }
 
             try {
                 chan.get(DBRType.STRING, chan.getElementCount(), this);
                 chan.getContext().flushIO();
+            	log.fine(chan.getName()+" create get");
             } catch(CAException ex) {
-                System.out.println(chan.getName() + ": Error connecting");
-                System.out.println(ex);
-                ex.printStackTrace();
+            	log.severe(chan.getName() + ": Error connecting");
+            	log.severe(ex.toString());
+            	log.severe(except2string(ex));
                 isdone = true;
             }
         }
@@ -44,27 +56,29 @@ public class caget {
             CAStatus sts = ev.getStatus();
             System.out.print(chan.getName() + ": ");
             if (sts != CAStatus.NORMAL) {
-                System.out.println(sts.getMessage());
+                log.warning(chan.getName()+" get error "+sts.getMessage());
+                return;
             }
+        	log.fine(chan.getName()+" Result available");
             DBR data = ev.getDBR();
 
             data.printInfo();
-            //DBR.printValue((String)data.getValue());
             isdone = true;
         }
 
         public void complete() {
             try {
+            	log.fine(chan.getName()+" Shutdown");
                 chan.destroy();
             } catch(CAException ex) {
-                System.out.println(chan.getName() + ": Destroy error: " + ex.getMessage());
-                System.out.println(ex);
-                ex.printStackTrace();
+            	log.severe(chan.getName() + ": Destroy error: " + ex.getMessage());
+            	log.severe(ex.toString());
+            	log.severe(except2string(ex));
             }
             if (isdone) {
                 return;
             }
-            System.out.println(chan.getName() + ": Not found");
+            log.severe(chan.getName() + ": Not found");
         }
     }
 
@@ -76,6 +90,13 @@ public class caget {
         optdef.addOption("l", "lib", true, "Access library (jca, caj)");
 
         return optdef;
+    }
+    
+    private static String except2string(Exception e) {
+    	final Writer result = new StringWriter();
+    	final PrintWriter print = new PrintWriter(result);
+    	e.printStackTrace(print);
+    	return result.toString();
     }
 
     public static void main(String[] args) {
@@ -94,16 +115,19 @@ public class caget {
             } else if(conf.equals("caj")) {
                 conf = JCALibrary.CHANNEL_ACCESS_JAVA;
             } else {
-            	System.out.println("Unknown configuration "+conf);
+            	log.severe("Unknown configuration "+conf);
             	System.exit(1);
             }
 
             Double timo = Double.valueOf(cmd.getOptionValue("w", "3"));
 
             boolean verb = cmd.hasOption("v");
+            if (verb) {
+            	log.setLevel(Level.ALL);
+            }
             
             if(cmd.getArgs().length==0) {
-            	System.out.println("Missing PV names");
+            	log.severe("Missing PV names");
             	System.exit(1);
             }
 
@@ -131,22 +155,21 @@ public class caget {
             }
 
         } catch(ParseException exp) {
-            System.out.println( "Argument error:" + exp.getMessage() );
+        	log.severe( "Argument error:" + exp.getMessage() );
+        	log.severe(except2string(exp));
             System.exit(1);
 
         } catch(Exception ex) {
-            System.out.print("Error: ");
-            System.out.println(ex);
-            ex.printStackTrace();
+        	log.severe("Error: "+ex);
+        	log.severe(except2string(ex));
         }
 
         if (cont != null) {
             try {
                 cont.destroy();
             } catch(Exception ex) {
-                System.out.print("Error Error: ");
-                System.out.println(ex);
-                ex.printStackTrace();
+            	log.severe("Error Error: "+ex);
+            	log.severe(except2string(ex));
             }
         }
     }
