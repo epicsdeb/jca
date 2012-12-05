@@ -5,6 +5,15 @@
   </properties>
   
   <body>
+    <release version="2.3.6" date="2012-06-14" description="DBE_PROPERTY support">
+      <action dev="carcassi" type="update">
+         Monitor payload size check at creation time.
+      </action>
+      <action dev="msekoranja" type="update">
+         DBE_PROPERTY support.
+      </action>
+    </release>
+
     <release version="2.3.5" date="2011-02-08" description="JNIException made public.">
       <action dev="msekoranja" type="fix">
         JNIException class made public. 

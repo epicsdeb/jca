@@ -654,6 +654,34 @@ abstract public class Channel {
   abstract public Monitor addMonitor(DBRType type, int count, int mask, MonitorListener l) throws CAException, IllegalStateException ;
 
   /**
+   * Checks whether the size of this monitor is greater than maxArrayBytes,
+   * and throws an exception if it is.
+   * 
+   * @param type type for the monitor
+   * @param count size of the monitor
+   * @param maxArrayBytes maximum size of the array
+   */
+  protected void checkMonitorSize(DBRType type, int count, int maxArrayBytes) {
+      int bytesPerElement = 0;
+      if (type.isBYTE()) {
+          bytesPerElement = 1;
+      } else if (type.isSHORT() || type.isENUM() || (type == DBRType.PUT_ACKT) || (type == DBRType.PUT_ACKS)) {
+          bytesPerElement = 2;
+      } else if (type.isINT() || type.isFLOAT()) {
+          bytesPerElement = 4;
+      } else if (type.isDOUBLE()) {
+          bytesPerElement = 8;
+      } else if (type.isSTRING()) {
+          bytesPerElement = 40; // MAX_STRING_SIZE
+      } else {
+          throw new IllegalArgumentException("Unsupported data type: " + type);
+      }
+
+      if (bytesPerElement * count > maxArrayBytes)
+          throw new IllegalArgumentException("Size of the monitor exceeds maxArrayBytes (" + count + " * " + bytesPerElement + " > " + maxArrayBytes + ")");
+  }
+  
+  /**
    * Prints details information about this Channel to the standard output stream.
    * @throws java.lang.IllegalStateException if the channel is in no state to perform this operation (ie destroyed, etc...)
    */
