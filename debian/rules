@@ -22,3 +22,4 @@ override_dh_auto_install:
 override_dh_auto_clean:
 	ant clean clean.doc
 	rm -f jcaget.jar jcaput.jar
+	rm -rf bin
