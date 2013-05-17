@@ -4,7 +4,7 @@ export DH_VERBOSE=1
 
 EPICS_HOST_ARCH:=$(shell /usr/lib/epics/startup/EpicsHostArch)
 
-export JAVA_HOME := /usr/lib/jvm/java-6-openjdk
+export JAVA_HOME := /usr/lib/jvm/java-6-openjdk-$(shell dpkg-architecture -qDEB_BUILD_ARCH)
 export CLASSPATH=
 
 %:
@@ -16,8 +16,11 @@ override_dh_auto_build:
 	CLASSPATH=$(CURDIR)/O.core/jca.jar:/usr/share/java/commons-cli.jar jh_build jcaput.jar -mcaput src/jcaput
 	jh_classpath
 
+JNIDIR := usr/lib/`dpkg-architecture -qDEB_BUILD_MULTIARCH`/jni
+
 override_dh_auto_install:
-	dh_install -plibjca-jni O.$(EPICS_HOST_ARCH)/libjca.so usr/lib/jni/
+	install -d debian/libjca-jni/$(JNIDIR)
+	dh_install -plibjca-jni O.$(EPICS_HOST_ARCH)/libjca.so $(JNIDIR);
 
 override_dh_auto_clean:
 	ant clean clean.doc
