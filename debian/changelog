@@ -1,3 +1,17 @@
+jca (2.3.6-3) unstable; urgency=low
+
+  * Build with default jdk.
+  * Removed non-standard character from comments in Severity.java and
+    Status.java
+
+ -- Leon Flaks <flaks@bnl.gov>  Thu, 10 Mar 2016 22:14:24 -0500
+
+jca (2.3.6-2+zjessie) jessie; urgency=low
+
+  * Build for jessie
+
+ -- Leon Flaks <flaks@bnl.gov>  Wed, 09 Mar 2016 16:09:17 -0500
+
 jca (2.3.6-2) unstable; urgency=low
 
   * Multiarch for wheezy
