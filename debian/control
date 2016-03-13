@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: Michael Davidsaver <mdavidsaver@bnl.gov>
 Build-Depends: debhelper (>= 7.0.50~), javahelper (>= 0.32~),
                epics-dev,
-               default-jdk, default-doc, ant,
+               default-jdk, default-jdk-doc, ant,
                ant-optional, libcommons-cli-java,
 Standards-Version: 3.9.0
 Homepage: http://epics-jca.sourceforge.net/
