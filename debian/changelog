@@ -1,3 +1,9 @@
+jca (2.3.6-4) unstable; urgency=medium
+
+  * add epics 3.15 compiler specific include
+
+ -- Michael Davidsaver <mdavidsaver@gmail.com>  Tue, 12 Jul 2016 13:45:06 -0400
+
 jca (2.3.6-3.1) unstable; urgency=low
 
   * Fixed typo in debian/control 
